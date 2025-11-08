@@ -1,11 +1,13 @@
-FROM eclipse-temurin:23-jdk as build
+# -------- BUILD STAGE --------
+FROM gradle:8.10-jdk21 AS builder
 WORKDIR /app
 COPY . .
-RUN chmod +x ./gradlew
-RUN ./gradlew bootJar --no-daemon
+RUN gradle clean bootJar --no-daemon
 
-FROM eclipse-temurin:23-jdk
+# -------- RUN STAGE --------
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar","app.jar"]
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+EXPOSE 8092
+ENTRYPOINT ["java", "-jar", "app.jar"]
